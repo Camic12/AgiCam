@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.CamaraTerreno" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/negro</item>
+        <item name="colorOnPrimary">@color/blanco</item>
+        <item name="android:windowBackground">@color/negro</item>
+        <item name="android:statusBarColor">@color/negro</item>
+        <item name="android:navigationBarColor">@color/negro</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+    </style>
+    <style name="Theme.CamaraTerreno" parent="Base.Theme.CamaraTerreno" />
+</resources>

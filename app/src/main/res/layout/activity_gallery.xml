@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- Visor deslizable (pantalla completa) -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPagerGallery"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Panel vacío -->
+    <LinearLayout
+        android:id="@+id/panelSinFotos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📷"
+            android:textSize="56sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sin fotos aún"
+            android:textColor="#AAFFFFFF"
+            android:textSize="18sp"
+            android:layout_marginTop="12dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Las fotos tomadas aparecerán aquí"
+            android:textColor="#66FFFFFF"
+            android:textSize="13sp"
+            android:layout_marginTop="6dp"/>
+
+    </LinearLayout>
+
+    <!-- Barra superior (contador + total) -->
+    <LinearLayout
+        android:id="@+id/barraContraoles"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingTop="20dp"
+        android:paddingBottom="24dp"
+        android:background="@drawable/degradado_superior"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/tvContador"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1 / 1"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:background="@drawable/fondo_pastilla"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"/>
+
+    </LinearLayout>
+
+    <!-- Barra inferior de acciones -->
+    <LinearLayout
+        android:id="@+id/barraAcciones"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="24dp"
+        android:paddingBottom="32dp"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        android:background="@drawable/degradado_inferior"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Botón volver -->
+        <FrameLayout
+            android:id="@+id/btnVolver"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/fondo_boton_accion"
+            android:foreground="?attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_menu_revert"
+                android:contentDescription="Volver"
+                app:tint="#FFFFFF"/>
+
+        </FrameLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"/>
+
+        <!-- Botón filtros -->
+        <FrameLayout
+            android:id="@+id/btnFiltros"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/fondo_boton_accion"
+            android:foreground="?attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_menu_sort_by_size"
+                android:contentDescription="Filtros"
+                app:tint="#FFFFFF"/>
+
+        </FrameLayout>
+
+        <!-- Botón compartir -->
+        <FrameLayout
+            android:id="@+id/btnCompartir"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/fondo_boton_accion"
+            android:foreground="?attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_menu_share"
+                android:contentDescription="Compartir"
+                app:tint="#FFFFFF"/>
+
+        </FrameLayout>
+
+        <!-- Botón eliminar -->
+        <FrameLayout
+            android:id="@+id/btnEliminar"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/fondo_boton_eliminar"
+            android:foreground="?attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_menu_delete"
+                android:contentDescription="Eliminar foto"
+                app:tint="#FFFFFF"/>
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

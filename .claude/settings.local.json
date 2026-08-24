@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:developers.google.com)",
+      "WebFetch(domain:ai.google.dev)",
+      "Bash(./gradlew.bat compileDebugKotlin --console=plain)",
+      "PowerShell(Get-Command java -ErrorAction SilentlyContinue; if \\($env:JAVA_HOME\\) { Write-Output \"JAVA_HOME=$env:JAVA_HOME\" } else { Write-Output \"JAVA_HOME not set\" }; Get-ChildItem \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\",\"C:\\\\Program Files\\\\Eclipse Adoptium\",\"C:\\\\Program Files\\\\Java\" -ErrorAction SilentlyContinue | Select-Object FullName)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\Android\" -Recurse -Depth 2 -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \"jbr|jre|jdk\" } | Select-Object FullName)",
+      "Bash(export JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\")",
+      "Bash(export JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" && find ~/.gradle/caches/modules-2/files-2.1/org.tensorflow -name \"*tensorflow-lite-task*0.4.0*.jar\" 2>/dev/null | head -3)",
+      "Bash(find ~/.gradle -name \"tensorflow-lite-task-vision-0.4.0*\" 2>/dev/null | head; find ~/.gradle -name \"tensorflow-lite-task-core*\" 2>/dev/null | head)",
+      "Bash(unzip -l \"/c/Users/ASUS/.gradle/caches/9.2.1/transforms/cc5f185ed2ce6a6a1804a2e960285a93/workspace/transformed/tensorflow-lite-task-vision-0.4.0-api.jar\")",
+      "Bash(grep \"\\\\.jar$\")",
+      "Bash(jar tf *)",
+      "Bash(xargs -I '{}' sh -c 'echo \"=={}\"; \"$JAVA_HOME/bin/jar\" tf \"{}\" 2>/dev/null | grep -i \"BaseOptions\\\\|TaskOptions\" ')",
+      "Bash('/c/Program Files/Android/Android Studio/jbr/bin/jar' tf /c/Users/ASUS/.gradle/caches/9.2.1/transforms/8cd3e9b86c1a3cc002f6eba18217e54e/workspace/transformed/tensorflow-lite-task-base-0.4.0/jars/classes.jar)"
+    ]
+  }
+}

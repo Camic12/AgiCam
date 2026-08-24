@@ -1,0 +1,4 @@
+0 Medidor
+1 Reja
+2 Via sin acceso
+3 Indefinido
