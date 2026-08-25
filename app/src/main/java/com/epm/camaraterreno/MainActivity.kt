@@ -88,6 +88,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE, android.view.WindowManager.LayoutParams.FLAG_SECURE)
         setContentView(R.layout.activity_main)
         @Suppress("DEPRECATION")
         window.decorView.systemUiVisibility = (
@@ -98,7 +99,6 @@ class MainActivity : AppCompatActivity() {
         )
 
         enlazarVistas()
-        limpiarCachePendiente()
         inicializarGestores()
 
         if (tienePermisos()) {
@@ -154,7 +154,14 @@ class MainActivity : AppCompatActivity() {
         gestorArchivos = GestorArchivos(this)
         gestorMovimiento = GestorMovimiento(this)
 
-        gestorIA.inicializar()
+        // Cargar modelo IA pesados y limpiar caché en hilo de fondo para no bloquear la UI
+        ejecutorFotos.execute {
+            gestorIA.inicializar()
+            limpiarCachePendiente()
+        }
+
+        // Cargar la miniatura inmediatamente en otro hilo ligero sin esperar a la IA
+        Thread { cargarUltimaMiniatura() }.start()
 
         gestorCamara.onCamaraLista = { min, max, actual ->
             exposicionMin = min
@@ -258,6 +265,43 @@ class MainActivity : AppCompatActivity() {
             isFlashOn = !isFlashOn
             gestorCamara.alternarAntorcha(isFlashOn)
             btnFlash.alpha = if (isFlashOn) 1f else 0.5f
+        }
+
+        // Resolución
+        val btnResolucion = findViewById<TextView>(R.id.btnResolucion)
+        btnResolucion.text = "1080p" // Default
+        btnResolucion.setOnClickListener { view ->
+            val popup = android.widget.PopupMenu(this, view)
+            popup.menu.add(0, 0, 0, "Nativa (Pantalla Completa)")
+            popup.menu.add(0, 1, 1, "4K - 8.3 MP (3840x2160)")
+            popup.menu.add(0, 2, 2, "1440p - 3.7 MP (2560x1440)")
+            popup.menu.add(0, 3, 3, "1080p - 2.1 MP (1920x1080)")
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    0 -> { // Nativa
+                        gestorArchivos.resolucionLadoMayor = 4000
+                        gestorCamara.actualizarPreview()
+                        btnResolucion.text = "MAX"
+                    }
+                    1 -> { // 4K
+                        gestorArchivos.resolucionLadoMayor = 3840
+                        gestorCamara.actualizarPreview()
+                        btnResolucion.text = "4K"
+                    }
+                    2 -> { // 1440p
+                        gestorArchivos.resolucionLadoMayor = 2560
+                        gestorCamara.actualizarPreview()
+                        btnResolucion.text = "1440p"
+                    }
+                    3 -> { // 1080p
+                        gestorArchivos.resolucionLadoMayor = 1920
+                        gestorCamara.actualizarPreview()
+                        btnResolucion.text = "1080p"
+                    }
+                }
+                true
+            }
+            popup.show()
         }
 
         // Selector modo
@@ -389,6 +433,46 @@ class MainActivity : AppCompatActivity() {
     private fun limpiarCachePendiente() {
         cacheDir.listFiles { f -> f.isFile && f.name.startsWith("captura_") && f.name.endsWith(".jpg") }
             ?.forEach { runCatching { it.delete() } }
+    }
+
+    private fun cargarUltimaMiniatura() {
+        try {
+            val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                android.provider.MediaStore.Images.Media.getContentUri(android.provider.MediaStore.VOLUME_EXTERNAL)
+            else
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+
+            val proyeccion = arrayOf(android.provider.MediaStore.Images.Media._ID)
+            val sort = "${android.provider.MediaStore.Images.Media.DATE_ADDED} DESC"
+            
+            contentResolver.query(
+                uri, proyeccion,
+                "${android.provider.MediaStore.Images.Media.RELATIVE_PATH} LIKE ?",
+                arrayOf("%TerrenoApp_Fotos%"),
+                sort
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val id = cursor.getLong(0)
+                    val uriFoto = android.content.ContentUris.withAppendedId(
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
+                    )
+                    
+                    val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        contentResolver.loadThumbnail(uriFoto, android.util.Size(160, 160), null)
+                    } else {
+                        android.provider.MediaStore.Images.Thumbnails.getThumbnail(
+                            contentResolver, id,
+                            android.provider.MediaStore.Images.Thumbnails.MICRO_KIND, null
+                        )
+                    }
+                    if (bitmap != null) {
+                        runOnUiThread { btnGaleria.setImageBitmap(bitmap) }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Error cargando miniatura", e)
+        }
     }
 
     // Animación de sacudida cuando bloquea captura por movimiento

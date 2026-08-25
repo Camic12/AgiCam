@@ -16,7 +16,6 @@ import kotlin.math.pow
 class GestorIA(private val contexto: Context) {
 
     private var clasificador: ImageClassifier? = null
-    private var clasificadorGeneral: ImageClassifier? = null
     private var etiquetas = emptyList<String>()
 
     private var lumaAnterior = -1.0
@@ -52,7 +51,6 @@ class GestorIA(private val contexto: Context) {
     fun inicializar() {
         cargarEtiquetas()
         inicializarClasificador()
-        inicializarClasificadorGeneral()
     }
 
     private fun cargarEtiquetas() {
@@ -71,7 +69,7 @@ class GestorIA(private val contexto: Context) {
      * Si NNAPI falla al crear el clasificador, reintentamos sólo con CPU.
      */
     private fun construirBaseOptions(usarNnapi: Boolean): BaseOptions {
-        val builder = BaseOptions.builder().setNumThreads(4)
+        val builder = BaseOptions.builder().setNumThreads(1) // Reducido a 1 para dispositivos de baja RAM
         if (usarNnapi && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             builder.useNnapi()
         }
@@ -105,11 +103,6 @@ class GestorIA(private val contexto: Context) {
     private fun inicializarClasificador() {
         clasificador = crearClasificador("model.tflite")
         if (clasificador == null) ultimaDeteccion = "Falta Modelo IA"
-    }
-
-    private fun inicializarClasificadorGeneral() {
-        // Opcional — la app sigue funcionando si falla.
-        clasificadorGeneral = crearClasificador("model_general.tflite")
     }
 
     fun analizarFrame(imagen: ImageProxy, flashActivo: Boolean): ResultadoAnalisis {
@@ -149,11 +142,10 @@ class GestorIA(private val contexto: Context) {
                     val esIndefinido = etiqueta.trim().equals("Indefinido", ignoreCase = true)
                     ultimaDeteccion = when {
                         !esIndefinido && cat.score > 0.4f -> "$etiqueta ($pct%)"
-                        else -> clasificarGeneral(bitmapParaIA)
-                            ?: if (esIndefinido) "Indefinido" else "Evaluando... ($pct%)"
+                        else -> if (esIndefinido) "Indefinido" else "Evaluando... ($pct%)"
                     }
                 } else {
-                    ultimaDeteccion = clasificarGeneral(bitmapParaIA) ?: "Indefinido"
+                    ultimaDeteccion = "Indefinido"
                 }
 
                 if (bitmapParaIA !== bitmap) bitmapParaIA.recycle()
@@ -163,18 +155,6 @@ class GestorIA(private val contexto: Context) {
         } finally {
             imagen.close()
         }
-    }
-
-    private fun clasificarGeneral(bitmap: Bitmap): String? {
-        val cls = clasificadorGeneral ?: return null
-        val resultados = cls.classify(TensorImage.fromBitmap(bitmap)) ?: return null
-        if (resultados.isEmpty() || resultados[0].categories.isEmpty()) return null
-        val cat = resultados[0].categories[0]
-        if (cat.score < 0.15f) return null
-        val pct = (cat.score * 100).toInt()
-        val labelLimpio = cat.label.replace(Regex("^\\d+\\s*"), "")
-        val label = TraduccionesIA.traducir(labelLimpio)
-        return "Obj: $label ($pct%)"
     }
 
     private fun evaluarEstadoCalidad(luma: Double, varianza: Double, flashActivo: Boolean): EstadoCalidad {
@@ -223,6 +203,5 @@ class GestorIA(private val contexto: Context) {
 
     fun liberar() {
         clasificador?.close()
-        clasificadorGeneral?.close()
     }
 }

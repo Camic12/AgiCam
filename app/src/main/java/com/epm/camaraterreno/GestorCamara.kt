@@ -88,17 +88,21 @@ class GestorCamara(
     else
         CameraSelector.DEFAULT_BACK_CAMERA
 
+    fun actualizarPreview() {
+        vincularUsoCasos()
+    }
+
     private fun vincularUsoCasos() {
         val proveedor = proveedorCamara ?: return
         val visorCamara = visor ?: return
 
         // Rotación del display: con esto CameraX entrega el JPEG ya orientado
-        // (vía EXIF) y no necesitamos rotar el bitmap manualmente.
         @Suppress("DEPRECATION")
         val rotacion = visorCamara.display?.rotation ?: 0
 
         val preview = Preview.Builder()
             .setTargetRotation(rotacion)
+            .setTargetAspectRatio(AspectRatio.RATIO_16_9)
             .build().also {
                 it.setSurfaceProvider(visorCamara.surfaceProvider)
             }
@@ -122,9 +126,9 @@ class GestorCamara(
             } else {
                 @Suppress("DEPRECATION")
                 capturaFoto = ImageCapture.Builder()
-                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-                    .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                     .setTargetRotation(rotacion)
+                    .setTargetAspectRatio(AspectRatio.RATIO_16_9)
                     .build()
                 @Suppress("DEPRECATION")
                 analisisImagen = ImageAnalysis.Builder()

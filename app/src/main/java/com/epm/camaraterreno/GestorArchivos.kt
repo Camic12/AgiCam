@@ -58,6 +58,8 @@ class GestorArchivos(private val contexto: Context) {
      * @return bitmap pequeño (thumbnail) listo para mostrar en el botón de
      *         galería, o null si algo falló.
      */
+    var resolucionLadoMayor: Int = 1920 // Default 1920 (1080p)
+
     fun procesarYPublicar(
         temp: File,
         nombreBase: String,
@@ -65,11 +67,8 @@ class GestorArchivos(private val contexto: Context) {
         deteccion: String
     ): Bitmap? {
         try {
-            // Downsample en el decode: CameraX entrega la foto a resolución
-            // nativa del sensor (puede ser 12 MP). Bajamos a ~1600 px de lado
-            // mayor para archivo final liviano y evitar OOM en dispositivos
-            // con poca RAM (ej. Ulefone Armor X13).
-            val original = decodificarConDownsample(temp, 1600) ?: return null
+            // Downsample en el decode según la calidad elegida.
+            val original = decodificarConDownsample(temp, resolucionLadoMayor) ?: return null
 
             val marcado = agregarMarcaDeAgua(original, ubicacion, deteccion)
             if (marcado !== original) original.recycle()
@@ -130,7 +129,8 @@ class GestorArchivos(private val contexto: Context) {
         // Paso 3: decodificar con downsample real.
         val opts = BitmapFactory.Options().apply {
             inSampleSize = sample
-            inPreferredConfig = Bitmap.Config.ARGB_8888
+            inPreferredConfig = Bitmap.Config.RGB_565
+            inMutable = true
         }
         val decodificado = BitmapFactory.decodeFile(path, opts) ?: return null
 
@@ -209,7 +209,7 @@ class GestorArchivos(private val contexto: Context) {
                         append("ARCHIVO: $nombreArchivo.jpg")
                         append(" | FECHA: ${formatoFecha.format(Date())}")
                         append(" | GPS: $ubicacion")
-                        append(" | IA: $deteccion\n")
+                        append(" | Modelo: $deteccion\n")
                     }
                     stream?.write(linea.toByteArray())
                 }
@@ -220,10 +220,8 @@ class GestorArchivos(private val contexto: Context) {
     }
 
     fun agregarMarcaDeAgua(src: Bitmap, ubicacion: String, deteccion: String): Bitmap {
-        val config = src.config ?: Bitmap.Config.ARGB_8888
-        val resultado = Bitmap.createBitmap(src.width, src.height, config)
+        val resultado = if (src.isMutable) src else src.copy(src.config ?: Bitmap.Config.RGB_565, true)
         val canvas = Canvas(resultado)
-        canvas.drawBitmap(src, 0f, 0f, null)
 
         // Escala basada en el lado menor para que el texto se vea proporcional
         // tanto en portrait (1080×1920) como en landscape (1920×1080).
@@ -245,8 +243,8 @@ class GestorArchivos(private val contexto: Context) {
         }
 
         val fecha = formatoFecha.format(Date())
-        val linea1 = "IA: $deteccion"
-        val linea2 = "$fecha  ·  GPS: $ubicacion"
+        val linea1 = "Modelo: $deteccion"
+        val linea2 = "$fecha  |  GPS: $ubicacion"
 
         // Reservamos espacio para el logo a la derecha. El ancho útil para texto
         // es el ancho de la imagen menos el logo, dos paddings y un margen.
