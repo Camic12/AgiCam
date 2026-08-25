@@ -1,9 +1,9 @@
 # REPORTE DE DESARROLLO - PROYECTO AGICAM
 
 ## Fecha: 25 de Agosto de 2026
-**Desarrollador / Equipo:** (Tu nombre)
+**Desarrollador: Juan Camilo Castañeda Garcia
 **Proyecto:** AGICAM (Integración con App SIRIUS - EPM)
-**Dispositivo Objetivo:** Ulefone Armor X13
+**Dispositivo pruebas:** Ulefone Armor X13
 
 ### Tareas Completadas:
 
@@ -25,3 +25,8 @@
 4. **Ajustes de Marca de Agua e IA:**
    - Se deshabilitó y removió el clasificador genérico de objetos (`model_general.tflite`) para enfocar el análisis estrictamente en el modelo personalizado (medidores y puertas).
    - Se actualizó el formato visual de la marca de agua: Se cambió la etiqueta a "Modelo:" y se implementó el separador "|" para la firma del GPS y la fecha.
+
+5. **Estrategia de Entrenamiento de IA (Pivot):**
+   - Se investigó el entrenamiento automatizado de TensorFlow Lite mediante Google Colab (MediaPipe Model Maker).
+   - Debido a problemas de incompatibilidad críticos recientes en los servidores de Colab con Python 3.12 y dependencias obsoletas (`tensorflow-addons`), se decidió pivotar la arquitectura de entrenamiento de vuelta a **Teachable Machine**.
+   - Teachable Machine garantiza una exportación limpia del modelo `.tflite` Cuantificado (INT8) y con los Metadatos embebidos exigidos nativamente por la librería `ImageClassifier` de Android, asegurando compatibilidad y bajo peso para la aplicación.
