@@ -1,0 +1,27 @@
+# REPORTE DE DESARROLLO - PROYECTO AGICAM
+
+## Fecha: 25 de Agosto de 2026
+**Desarrollador / Equipo:** (Tu nombre)
+**Proyecto:** AGICAM (Integración con App SIRIUS - EPM)
+**Dispositivo Objetivo:** Ulefone Armor X13
+
+### Tareas Completadas:
+
+1. **Corrección de Aspect Ratio (Evitar Recorte de Fotos):**
+   - Se eliminó el escalado rígido que forzaba a la cámara a recortar el sensor en un cuadro (letterboxing).
+   - Se configuró el motor `CameraX` (Visor y Captura) para usar nativamente el formato `AspectRatio.RATIO_16_9`, garantizando que lo que se ve en la pantalla completa sea idéntico a lo que se guarda.
+   - El escalado y compresión según la resolución elegida (1080p, 1440p, 4K) ahora ocurre post-captura, asegurando ligereza de archivos sin distorsión.
+
+2. **Optimización Extrema de Memoria RAM (Cold Start):**
+   - Se diagnosticó y mitigó un cuello de botella de 7-8 segundos al abrir la cámara, provocado por la falta de RAM al alternar entre la app SIRIUS y AGICAM.
+   - Se movió la inicialización del modelo de Inteligencia Artificial (`GestorIA`) y la limpieza de caché a hilos de segundo plano.
+   - Se redujo el uso del procesador por parte de TensorFlow Lite de 4 núcleos a 1, disminuyendo el peso en memoria y estabilizando el sistema en dispositivos de gama de entrada.
+
+3. **Rediseño de Interfaz de Galería (UI/UX):**
+   - Se migró la galería de imágenes a un `RecyclerView` moderno con formato cuadrícula.
+   - Se movieron todos los controles (Filtros, Volver, Eliminar, Compartir) a un único panel unificado en la parte inferior de la pantalla para facilitar la usabilidad con una sola mano (accesibilidad del pulgar).
+   - La carga de la miniatura de la última foto tomada ahora se ejecuta asíncronamente para no bloquear el inicio de la app.
+
+4. **Ajustes de Marca de Agua e IA:**
+   - Se deshabilitó y removió el clasificador genérico de objetos (`model_general.tflite`) para enfocar el análisis estrictamente en el modelo personalizado (medidores y puertas).
+   - Se actualizó el formato visual de la marca de agua: Se cambió la etiqueta a "Modelo:" y se implementó el separador "|" para la firma del GPS y la fecha.
