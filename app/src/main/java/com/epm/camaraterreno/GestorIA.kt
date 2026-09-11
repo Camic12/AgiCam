@@ -141,11 +141,11 @@ class GestorIA(private val contexto: Context) {
                     etiqueta = etiqueta.replace(Regex("^\\d+\\s*"), "")
                     val esIndefinido = etiqueta.trim().equals("Indefinido", ignoreCase = true)
                     ultimaDeteccion = when {
-                        !esIndefinido && cat.score > 0.4f -> "$etiqueta ($pct%)"
-                        else -> if (esIndefinido) "Indefinido" else "Evaluando... ($pct%)"
+                        cat.score >= 0.60f && !esIndefinido -> "$etiqueta ($pct%)"
+                        else -> "No detectado"
                     }
                 } else {
-                    ultimaDeteccion = "Indefinido"
+                    ultimaDeteccion = "No detectado"
                 }
 
                 if (bitmapParaIA !== bitmap) bitmapParaIA.recycle()
