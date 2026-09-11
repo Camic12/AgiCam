@@ -61,6 +61,7 @@ class GestorCamara(
     var onCamaraLista: ((Int, Int, Int) -> Unit)? = null // min, max, indiceActual exposición
 
     var estaGrabando = false
+        private set
     
     private val orientacionListener = object : android.view.OrientationEventListener(contexto) {
         override fun onOrientationChanged(orientation: Int) {
@@ -73,7 +74,6 @@ class GestorCamara(
             }
         }
     }
-        private set
 
     val esCaraFrontal: Boolean get() = esFrontal
 
