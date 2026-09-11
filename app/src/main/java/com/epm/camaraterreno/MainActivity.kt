@@ -169,8 +169,8 @@ class MainActivity : AppCompatActivity() {
             exposicionActual = actual
         }
 
-        gestorCamara.onFrameAnalizado = { imagen ->
-            val resultado = gestorIA.analizarFrame(imagen, isFlashOn)
+        gestorCamara.onFrameAnalizado = { imagen, rotacionDispositivo ->
+            val resultado = gestorIA.analizarFrame(imagen, rotacionDispositivo, isFlashOn)
             runOnUiThread { procesarResultadoAnalisis(resultado) }
         }
 

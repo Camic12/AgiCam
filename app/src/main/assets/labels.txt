@@ -1,4 +1,7 @@
-0 Medidor
-1 Reja
-2 Via sin acceso
-3 Indefinido
+0 Anomalia
+1 Dificultad de acceso
+2 Fachada
+3 Medidor agua
+4 Medidor energia
+5 Medidor gas
+6 No detectado

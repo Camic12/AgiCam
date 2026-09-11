@@ -53,23 +53,38 @@ class GestorCamara(
 
     private var modoVideo = false
     private var esFrontal = false
+    
+    // Rastrear rotación física del dispositivo (0, 90, 180, 270)
+    var rotacionDispositivo = 0
 
-    var onFrameAnalizado: ((ImageProxy) -> Unit)? = null
+    var onFrameAnalizado: ((ImageProxy, Int) -> Unit)? = null
     var onCamaraLista: ((Int, Int, Int) -> Unit)? = null // min, max, indiceActual exposición
 
     var estaGrabando = false
+    
+    private val orientacionListener = object : android.view.OrientationEventListener(contexto) {
+        override fun onOrientationChanged(orientation: Int) {
+            if (orientation == ORIENTATION_UNKNOWN) return
+            rotacionDispositivo = when (orientation) {
+                in 45..134 -> 270
+                in 135..224 -> 180
+                in 225..314 -> 90
+                else -> 0
+            }
+        }
+    }
         private set
 
     val esCaraFrontal: Boolean get() = esFrontal
 
     fun iniciar(visorCamara: PreviewView) {
         this.visor = visorCamara
-        ProcessCameraProvider.getInstance(contexto).also { futuro ->
-            futuro.addListener({
-                proveedorCamara = futuro.get()
-                vincularUsoCasos()
-            }, ContextCompat.getMainExecutor(contexto))
-        }
+        orientacionListener.enable()
+        val futureCamara = ProcessCameraProvider.getInstance(contexto)
+        futureCamara.addListener({
+            proveedorCamara = futureCamara.get()
+            vincularUsoCasos()
+        }, ContextCompat.getMainExecutor(contexto))
     }
 
     fun cambiarModo(esVideo: Boolean) {
@@ -137,7 +152,7 @@ class GestorCamara(
                     .setTargetResolution(resolucionAnalisis)
                     .setTargetRotation(rotacion)
                     .build().also {
-                        it.setAnalyzer(ejecutor) { imagen -> onFrameAnalizado?.invoke(imagen) }
+                        it.setAnalyzer(ejecutor) { imagen -> onFrameAnalizado?.invoke(imagen, rotacionDispositivo) }
                     }
                 proveedor.bindToLifecycle(
                     cicloVida, selectorActual(),
@@ -235,6 +250,8 @@ class GestorCamara(
     }
 
     fun liberar() {
+        orientacionListener.disable()
+        proveedorCamara?.unbindAll()
         ejecutor.shutdown()
     }
 }

@@ -105,12 +105,8 @@ class GestorIA(private val contexto: Context) {
         if (clasificador == null) ultimaDeteccion = "Falta Modelo IA"
     }
 
-    fun analizarFrame(imagen: ImageProxy, flashActivo: Boolean): ResultadoAnalisis {
+    fun analizarFrame(imagen: ImageProxy, rotacionDispositivo: Int, flashActivo: Boolean): ResultadoAnalisis {
         try {
-            // El bitmap del sensor SIEMPRE viene en landscape (orientación nativa),
-            // independientemente de setTargetRotation. Para luma/varianza da igual,
-            // pero el clasificador necesita el bitmap correctamente orientado
-            // (los modelos están entrenados con imágenes "derechas").
             val bitmap = imagen.toBitmap()
             val (luma, varianza) = calcularCalidad(bitmap)
             val estado = evaluarEstadoCalidad(luma, varianza, flashActivo)
@@ -123,8 +119,9 @@ class GestorIA(private val contexto: Context) {
             if (debeClasificar) {
                 ultimaClasificacionMs = ahora
 
-                // Rotamos sólo cuando vamos a clasificar (no en cada frame).
-                val grados = imagen.imageInfo.rotationDegrees
+                // Compensamos la rotación del sensor (rotationDegrees) con la rotación física del dispositivo
+                // Esto garantiza que si el celular está horizontal, la IA reciba la imagen derecha.
+                val grados = (imagen.imageInfo.rotationDegrees - rotacionDispositivo + 360) % 360
                 val bitmapParaIA = if (grados != 0) {
                     val matrix = Matrix().apply { postRotate(grados.toFloat()) }
                     Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
